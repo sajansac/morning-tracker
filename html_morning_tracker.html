@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morning Routine Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f9fafb; }
+        .app-container { max-width: 448px; margin: 0 auto; background: white; min-height: 100vh; }
+        .gradient-header { background: linear-gradient(to right, #2563eb, #9333ea); }
+        .scale-animation { transition: transform 0.2s; }
+        .scale-animation:active { transform: scale(0.95); }
+        .hide { display: none; }
+        .show { display: block; }
+        .feeling-btn { transition: all 0.3s; }
+        .feeling-btn:hover { transform: scale(1.02); }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="gradient-header text-white p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-semibold">Morning Tracker</h1>
+                    <p class="text-blue-100 text-sm">Inspiration-driven approach</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold" id="streak-counter">0</div>
+                    <div class="text-xs text-blue-100">day streak</div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <input type="date" id="date-picker" class="bg-white/20 text-white placeholder-blue-200 rounded-lg px-3 py-2 text-sm w-full">
+            </div>
+        </div>
+
+        <!-- Daily Questions -->
+        <div class="p-6 space-y-6">
+            <!-- P0 Hour Question -->
+            <div class="space-y-3">
+                <h3 class="font-medium text-gray-800 flex items-center">
+                    🎯 Did I show up for my P0 hour?
+                </h3>
+                <div class="flex gap-3">
+                    <button onclick="updateP0Hour(true)" class="p0-btn flex-1 py-3 px-4 rounded-lg font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="true">
+                        Yes ✓
+                    </button>
+                    <button onclick="updateP0Hour(false)" class="p0-btn flex-1 py-3 px-4 rounded-lg font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="false">
+                        No ✗
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feeling Question -->
+            <div class="space-y-3">
+                <h3 class="font-medium text-gray-800 flex items-center">
+                    ❤️ How did I feel during it?
+                </h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="updateFeeling('inspired')" class="feeling-btn p-3 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="inspired">
+                        <span class="text-lg mr-1">🚀</span> Inspired
+                    </button>
+                    <button onclick="updateFeeling('focused')" class="feeling-btn p-3 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="focused">
+                        <span class="text-lg mr-1">🎯</span> Focused
+                    </button>
+                    <button onclick="updateFeeling('forced')" class="feeling-btn p-3 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="forced">
+                        <span class="text-lg mr-1">😤</span> Forced
+                    </button>
+                    <button onclick="updateFeeling('skipped')" class="feeling-btn p-3 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="skipped">
+                        <span class="text-lg mr-1">⏸️</span> Skipped
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tomorrow Note -->
+            <div class="space-y-3">
+                <h3 class="font-medium text-gray-800">One thing for tomorrow?</h3>
+                <textarea id="tomorrow-note" placeholder="What inspired me? What should I focus on tomorrow?" class="w-full p-3 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3"></textarea>
+            </div>
+
+            <!-- Energy Level -->
+            <div class="space-y-3">
+                <h3 class="font-medium text-gray-800">Energy Level (1-5)</h3>
+                <div class="flex gap-2">
+                    <button onclick="updateEnergy(1)" class="energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="1">1</button>
+                    <button onclick="updateEnergy(2)" class="energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="2">2</button>
+                    <button onclick="updateEnergy(3)" class="energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="3">3</button>
+                    <button onclick="updateEnergy(4)" class="energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="4">4</button>
+                    <button onclick="updateEnergy(5)" class="energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="5">5</button>
+                </div>
+            </div>
+
+            <!-- Sleep Quality -->
+            <div class="space-y-3">
+                <h3 class="font-medium text-gray-800">Sleep Quality (1-5)</h3>
+                <div class="flex gap-2">
+                    <button onclick="updateSleep(1)" class="sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="1">1</button>
+                    <button onclick="updateSleep(2)" class="sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="2">2</button>
+                    <button onclick="updateSleep(3)" class="sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="3">3</button>
+                    <button onclick="updateSleep(4)" class="sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="4">4</button>
+                    <button onclick="updateSleep(5)" class="sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-value="5">5</button>
+                </div>
+            </div>
+
+            <!-- Work Type -->
+            <div class="space-y-3">
+                <h3 class="font-medium text-gray-800">P0 Hour Focus</h3>
+                <select id="work-type" class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Select focus area...</option>
+                    <option value="content-creation">AI Content Creation</option>
+                    <option value="tool-building">Building AI Tools</option>
+                    <option value="research">Research & Learning</option>
+                    <option value="strategy">Business Strategy</option>
+                    <option value="writing">Writing/Documentation</option>
+                    <option value="planning">Planning & Ideas</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- AI Insights -->
+        <div class="px-6 pb-6">
+            <button onclick="toggleAIInsights()" class="w-full bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 p-4 rounded-lg flex items-center justify-between transition-colors border border-purple-200">
+                <span class="font-medium text-gray-800 flex items-center">
+                    🧠 AI Daily Insights
+                </span>
+                <span id="ai-arrow">▶</span>
+            </button>
+            <div id="ai-insights" class="hide mt-4 space-y-4">
+                <div id="ai-recommendation" class="p-4 rounded-lg border-2 bg-gray-50 border-gray-200 text-gray-800">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold" id="ai-title">🎯 Keep Going</h4>
+                        <span class="text-xs bg-white/50 px-2 py-1 rounded" id="ai-confidence">60% confident</span>
+                    </div>
+                    <p class="text-sm mb-3 leading-relaxed" id="ai-text">Still building the pattern. Focus on showing up consistently before optimizing.</p>
+                    <div class="bg-white/50 p-3 rounded border-l-4 border-current">
+                        <div class="flex items-start">
+                            💡 <span class="text-xs font-medium ml-2" id="ai-actionable">Tomorrow: Just show up. Quality will follow consistency.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Week View -->
+        <div class="px-6 pb-6">
+            <button onclick="toggleWeekView()" class="w-full bg-gray-50 hover:bg-gray-100 p-4 rounded-lg flex items-center justify-between transition-colors">
+                <span class="font-medium text-gray-800 flex items-center">
+                    📈 Weekly Energy Check
+                </span>
+                <span id="week-arrow">▶</span>
+            </button>
+            <div id="week-view" class="hide mt-4 space-y-4">
+                <div class="grid grid-cols-7 gap-2" id="week-grid"></div>
+                <div class="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span>Completion Rate:</span>
+                        <span class="font-bold" id="completion-rate">0%</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Total Days Tracked:</span>
+                        <span class="font-bold" id="total-days">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Current Streak:</span>
+                        <span class="font-bold" id="current-streak">0 days</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Button -->
+        <div class="px-6 pb-6">
+            <button onclick="exportData()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg flex items-center justify-center text-sm transition-colors">
+                📥 Export Data
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let entries = JSON.parse(localStorage.getItem('morningTrackerEntries') || '{}');
+        let currentDate = new Date().toISOString().split('T')[0];
+
+        // Initialize
+        document.getElementById('date-picker').value = currentDate;
+        loadTodayEntry();
+        updateStats();
+
+        // Date picker
+        document.getElementById('date-picker').addEventListener('change', function(e) {
+            currentDate = e.target.value;
+            loadTodayEntry();
+            updateStats();
+        });
+
+        // Tomorrow note
+        document.getElementById('tomorrow-note').addEventListener('input', function(e) {
+            updateEntry('tomorrowNote', e.target.value);
+        });
+
+        // Work type
+        document.getElementById('work-type').addEventListener('change', function(e) {
+            updateEntry('workType', e.target.value);
+        });
+
+        function updateEntry(field, value) {
+            if (!entries[currentDate]) {
+                entries[currentDate] = {};
+            }
+            entries[currentDate][field] = value;
+            entries[currentDate].timestamp = new Date().toISOString();
+            localStorage.setItem('morningTrackerEntries', JSON.stringify(entries));
+            updateStats();
+            generateAIInsights();
+        }
+
+        function updateP0Hour(value) {
+            updateEntry('p0Hour', value);
+            // Update UI
+            document.querySelectorAll('.p0-btn').forEach(btn => {
+                btn.className = 'p0-btn flex-1 py-3 px-4 rounded-lg font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+            });
+            const selectedBtn = document.querySelector(`[data-value="${value}"]`);
+            if (value) {
+                selectedBtn.className = 'p0-btn flex-1 py-3 px-4 rounded-lg font-medium transition-all bg-green-500 text-white shadow-lg';
+            } else {
+                selectedBtn.className = 'p0-btn flex-1 py-3 px-4 rounded-lg font-medium transition-all bg-red-500 text-white shadow-lg';
+            }
+        }
+
+        function updateFeeling(value) {
+            updateEntry('feeling', value);
+            // Update UI
+            document.querySelectorAll('.feeling-btn').forEach(btn => {
+                btn.className = 'feeling-btn p-3 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+            });
+            const selectedBtn = document.querySelector(`[data-value="${value}"]`);
+            const colors = {
+                'inspired': 'bg-green-100 text-green-800 shadow-lg scale-105',
+                'focused': 'bg-blue-100 text-blue-800 shadow-lg scale-105',
+                'forced': 'bg-yellow-100 text-yellow-800 shadow-lg scale-105',
+                'skipped': 'bg-red-100 text-red-800 shadow-lg scale-105'
+            };
+            selectedBtn.className = `feeling-btn p-3 rounded-lg text-sm font-medium transition-all ${colors[value]}`;
+        }
+
+        function updateEnergy(value) {
+            updateEntry('energy', value);
+            // Update UI
+            document.querySelectorAll('.energy-btn').forEach(btn => {
+                btn.className = 'energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+            });
+            const selectedBtn = document.querySelector(`.energy-btn[data-value="${value}"]`);
+            selectedBtn.className = 'energy-btn w-12 h-12 rounded-full font-bold transition-all bg-blue-500 text-white shadow-lg scale-110';
+        }
+
+        function updateSleep(value) {
+            updateEntry('sleepQuality', value);
+            // Update UI
+            document.querySelectorAll('.sleep-btn').forEach(btn => {
+                btn.className = 'sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+            });
+            const selectedBtn = document.querySelector(`.sleep-btn[data-value="${value}"]`);
+            selectedBtn.className = 'sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-purple-500 text-white shadow-lg scale-110';
+        }
+
+        function loadTodayEntry() {
+            const todayEntry = entries[currentDate] || {};
+            
+            // Load P0 Hour
+            if (todayEntry.p0Hour !== undefined) {
+                updateP0Hour(todayEntry.p0Hour);
+            } else {
+                document.querySelectorAll('.p0-btn').forEach(btn => {
+                    btn.className = 'p0-btn flex-1 py-3 px-4 rounded-lg font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+                });
+            }
+            
+            // Load feeling
+            if (todayEntry.feeling) {
+                updateFeeling(todayEntry.feeling);
+            } else {
+                document.querySelectorAll('.feeling-btn').forEach(btn => {
+                    btn.className = 'feeling-btn p-3 rounded-lg text-sm font-medium transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+                });
+            }
+            
+            // Load energy
+            if (todayEntry.energy) {
+                updateEnergy(todayEntry.energy);
+            } else {
+                document.querySelectorAll('.energy-btn').forEach(btn => {
+                    btn.className = 'energy-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+                });
+            }
+            
+            // Load sleep
+            if (todayEntry.sleepQuality) {
+                updateSleep(todayEntry.sleepQuality);
+            } else {
+                document.querySelectorAll('.sleep-btn').forEach(btn => {
+                    btn.className = 'sleep-btn w-12 h-12 rounded-full font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200';
+                });
+            }
+            
+            // Load text fields
+            document.getElementById('tomorrow-note').value = todayEntry.tomorrowNote || '';
+            document.getElementById('work-type').value = todayEntry.workType || '';
+        }
+
+        function updateStats() {
+            const dates = Object.keys(entries).sort();
+            let currentStreak = 0;
+            
+            // Calculate current streak
+            for (let i = dates.length - 1; i >= 0; i--) {
+                if (entries[dates[i]].p0Hour === true) {
+                    currentStreak++;
+                } else {
+                    break;
+                }
+            }
+            
+            const totalDays = dates.length;
+            const completedDays = dates.filter(date => entries[date].p0Hour === true).length;
+            const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+            
+            document.getElementById('streak-counter').textContent = currentStreak;
+            document.getElementById('completion-rate').textContent = completionRate + '%';
+            document.getElementById('total-days').textContent = totalDays;
+            document.getElementById('current-streak').textContent = currentStreak + ' days';
+            
+            updateWeekView();
+        }
+
+        function updateWeekView() {
+            const weekGrid = document.getElementById('week-grid');
+            weekGrid.innerHTML = '';
+            
+            const today = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const entry = entries[dateStr] || {};
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'text-center';
+                
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'text-xs text-gray-500 mb-1';
+                dayLabel.textContent = date.toLocaleDateString('en-US', { weekday: 'short' });
+                
+                const energyCircle = document.createElement('div');
+                energyCircle.className = `w-8 h-8 rounded-full mx-auto flex items-center justify-center text-xs font-bold ${
+                    entry.p0Hour === true ? 'bg-green-500 text-white' :
+                    entry.p0Hour === false ? 'bg-red-500 text-white' :
+                    'bg-gray-200 text-gray-400'
+                }`;
+                energyCircle.textContent = entry.energy || '?';
+                
+                dayDiv.appendChild(dayLabel);
+                dayDiv.appendChild(energyCircle);
+                weekGrid.appendChild(dayDiv);
+            }
+        }
+
+        function generateAIInsights() {
+            const dates = Object.keys(entries).sort();
+            if (dates.length < 3) {
+                document.getElementById('ai-title').textContent = '📊 Building Your Dataset';
+                document.getElementById('ai-text').textContent = 'Keep tracking for a few more days to unlock personalized AI insights!';
+                document.getElementById('ai-actionable').textContent = 'Add more entries to see patterns';
+                document.getElementById('ai-confidence').textContent = '';
+                return;
+            }
+
+            const recentEntries = dates.slice(-7).map(date => entries[date]).filter(entry => entry && entry.p0Hour !== null);
+            if (recentEntries.length === 0) {
+                document.getElementById('ai-title').textContent = '🎯 Start Your Journey';
+                document.getElementById('ai-text').textContent = 'Start tracking your P0 hours to unlock AI insights!';
+                document.getElementById('ai-actionable').textContent = 'Complete your first P0 hour entry';
+                document.getElementById('ai-confidence').textContent = '';
+                return;
+            }
+
+            // Simple AI analysis
+            const energyLevels = recentEntries.filter(e => e.energy).map(e => e.energy);
+            const avgEnergy = energyLevels.length > 0 ? energyLevels.reduce((a, b) => a + b, 0) / energyLevels.length : 0;
+            
+            const feelings = recentEntries.filter(e => e.feeling).map(e => e.feeling);
+            const forcedCount = feelings.filter(f => f === 'forced').length;
+            const inspiredCount = feelings.filter(f => f === 'inspired').length;
+            
+            const completionRate = recentEntries.filter(e => e.p0Hour === true).length / recentEntries.length;
+
+            // Generate recommendation
+            let recommendation = {};
+            
+            if (forcedCount >= 3) {
+                recommendation = {
+                    title: '⚠️ Burnout Alert',
+                    text: "You've been forcing your P0 hours lately. Take 1-2 easy days - do light reading or planning instead of heavy creation work.",
+                    actionable: "Tomorrow: 30min light reading or organizing ideas instead of creating content",
+                    confidence: 90,
+                    color: 'bg-red-50 border-red-200 text-red-800'
+                };
+            } else if (avgEnergy < 3) {
+                recommendation = {
+                    title: '⚡ Energy Optimization Needed',
+                    text: "Your energy has been low. Try: morning exercise, cold water, or shifting P0 hour timing.",
+                    actionable: "Tomorrow: Try your P0 hour 30 minutes earlier or after some movement",
+                    confidence: 70,
+                    color: 'bg-orange-50 border-orange-200 text-orange-800'
+                };
+            } else if (inspiredCount >= 2 && avgEnergy > 3.5) {
+                recommendation = {
+                    title: '🚀 Great Momentum!',
+                    text: "You're in an inspired phase! This is the time to tackle your most challenging AI content projects.",
+                    actionable: "Tomorrow: Focus on that complex project you've been avoiding - your energy supports it",
+                    confidence: 88,
+                    color: 'bg-green-50 border-green-200 text-green-800'
+                };
+            } else if (completionRate >= 0.7) {
+                recommendation = {
+                    title: '📈 Consistency Building',
+                    text: `You're ${Math.round(completionRate * 100)}% consistent! Time to level up the quality of your P0 hours.`,
+                    actionable: "Tomorrow: Set a specific outcome goal for your P0 hour (e.g., 'finish X section')",
+                    confidence: 80,
+                    color: 'bg-blue-50 border-blue-200 text-blue-800'
+                };
+            } else {
+                recommendation = {
+                    title: '🎯 Keep Going',
+                    text: "Still building the pattern. Focus on showing up consistently before optimizing.",
+                    actionable: "Tomorrow: Just show up. Quality will follow consistency.",
+                    confidence: 60,
+                    color: 'bg-gray-50 border-gray-200 text-gray-800'
+                };
+            }
+
+            // Update UI
+            document.getElementById('ai-title').textContent = recommendation.title;
+            document.getElementById('ai-text').textContent = recommendation.text;
+            document.getElementById('ai-actionable').textContent = recommendation.actionable;
+            document.getElementById('ai-confidence').textContent = recommendation.confidence + '% confident';
+            
+            const aiRec = document.getElementById('ai-recommendation');
+            aiRec.className = `p-4 rounded-lg border-2 ${recommendation.color}`;
+        }
+
+        function toggleAIInsights() {
+            const insights = document.getElementById('ai-insights');
+            const arrow = document.getElementById('ai-arrow');
+            if (insights.classList.contains('hide')) {
+                insights.classList.remove('hide');
+                insights.classList.add('show');
+                arrow.textContent = '▼';
+                generateAIInsights();
+            } else {
+                insights.classList.remove('show');
+                insights.classList.add('hide');
+                arrow.textContent = '▶';
+            }
+        }
+
+        function toggleWeekView() {
+            const weekView = document.getElementById('week-view');
+            const arrow = document.getElementById('week-arrow');
+            if (weekView.classList.contains('hide')) {
+                weekView.classList.remove('hide');
+                weekView.classList.add('show');
+                arrow.textContent = '▼';
+                updateWeekView();
+            } else {
+                weekView.classList.remove('show');
+                weekView.classList.add('hide');
+                arrow.textContent = '▶';
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(entries, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `morning-routine-tracker-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Initialize AI insights on load
+        generateAIInsights();
+    </script>
+</body>
+</html>
